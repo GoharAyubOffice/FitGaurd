@@ -7,7 +7,7 @@ public class EnemyController : MonoBehaviour
     public float leftLimit = -4.5f;
     public float rightLimit = 4.5f;
     public float xOffsetChangeSpeed = 0.5f;
-     public float destroyPositionZ = -10f; // Add this line
+    public float destroyPositionZ = -10f; // Add this line
     private float targetX;
 
     void Start()
@@ -44,6 +44,31 @@ public class EnemyController : MonoBehaviour
         else if (Mathf.Abs(transform.position.x - leftLimit) < 0.1f)
         {
             targetX = rightLimit;
+        }
+    }
+    void OnCollisionEnter(Collision collision)
+    {
+        FoodType foodType = collision.gameObject.GetComponent<FoodType>();
+        if (foodType != null)
+        {
+            switch (foodType.type)
+            {
+                case FoodType.Type.FastFood:
+                    transform.localScale += new Vector3(2f, 2f, 2f); // Increase scale 2x
+                    break;
+                case FoodType.Type.Salad:
+                    transform.localScale -= new Vector3(1f, 1f, 1f); // Maintain the scale
+                    break;
+                case FoodType.Type.Coke:
+                    transform.localScale += new Vector3(1.5f, 1.5f, 1.5f); // Increase scale 1.5x
+                    break;
+                case FoodType.Type.Junk:
+                    transform.localScale -= new Vector3(0.5f, 0.5f, 0.5f); // Decrease scale .5x
+                    break;
+                case FoodType.Type.Meat:
+                    transform.localScale -= new Vector3(3f, 3f, 3f); // Increase scale 3x
+                    break;
+            }
         }
     }
 }
