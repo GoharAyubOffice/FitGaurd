@@ -273,15 +273,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodPrefabs:
   - {fileID: 9198024676848677266, guid: 369ba91d9f7d94af89584d6d27475151, type: 3}
-  - {fileID: 9198024676848677266, guid: 369ba91d9f7d94af89584d6d27475151, type: 3}
-  - {fileID: 9198024676848677266, guid: 369ba91d9f7d94af89584d6d27475151, type: 3}
-  - {fileID: 9198024676848677266, guid: 369ba91d9f7d94af89584d6d27475151, type: 3}
-  - {fileID: 9198024676848677266, guid: 369ba91d9f7d94af89584d6d27475151, type: 3}
-  throwForce: 1000
-  delay: 2
+  - {fileID: 9198024676848677266, guid: 455ccb640a8244378a976aedd0d797bd, type: 3}
+  - {fileID: 9198024676848677266, guid: 770724c477c364276aa07e8c8806f0b6, type: 3}
+  - {fileID: 9198024676848677266, guid: 40b28515409b94eb1ba8a20ad1495d4f, type: 3}
+  - {fileID: 9198024676848677266, guid: 035d214c3e2ca4bb0bfbaeb26820fd78, type: 3}
   shootPosition: {fileID: 1470620715224196937}
-  poolSize: 5
+  throwForce: 1000
   destroyTime: 4
+  tapDelay: 1
+  poolSize: 5
 --- !u!1 &8610427283323367252
 GameObject:
   m_ObjectHideFlags: 0

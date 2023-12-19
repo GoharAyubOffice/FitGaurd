@@ -1,42 +1,60 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class EnemyController : MonoBehaviour
 {
     public float speed = 1f;
     public float leftLimit = -4.5f;
     public float rightLimit = 4.5f;
     public float xOffsetChangeSpeed = 0.5f;
-    public float destroyPositionZ = -10f; // Add this line
+    public float destroyPositionZ = -10f;
+    private float individualDestroyPositionZ;
+    private bool stopMovement = false;
     private float targetX;
+    public float minSpeed, maxSpeed;
+    public bool hitEnemy = false;
+    public float minXOffsetChangeSpeed, maxXOffsetChangeSpeed;
+
+
+    public static List<float> stoppedEnemyPositions = new List<float>();
 
     void Start()
     {
-        targetX = rightLimit; // Initially set the target x position to the right limit
+        individualDestroyPositionZ = destroyPositionZ;
+        speed = Random.Range(minSpeed, maxSpeed);
+        xOffsetChangeSpeed = Random.Range(minXOffsetChangeSpeed, maxXOffsetChangeSpeed);
+        targetX = rightLimit;
     }
-
 
     void Update()
     {
-        MoveForward();
-
-        // Destroy the enemy if it moves through the specific position
-        if (transform.position.z <= destroyPositionZ)
+        if (!stopMovement)
         {
-            Destroy(gameObject);
+            MoveForward();
+
+            if (stoppedEnemyPositions.Contains(individualDestroyPositionZ))
+            {
+                individualDestroyPositionZ -= 1f;
+            }
+
+            if (transform.position.z <= individualDestroyPositionZ)
+            {
+                stopMovement = true;
+                speed = 0;
+                stoppedEnemyPositions.Add(individualDestroyPositionZ);
+            }
         }
     }
 
     private void MoveForward()
     {
-        // Move forward
-        transform.position += -Vector3.forward * speed * Time.deltaTime;
+        float randomZOffset = Random.Range(-0.1f, 0.1f);
+        transform.position += -Vector3.forward * (speed + randomZOffset) * Time.deltaTime;
 
-        // Smoothly change the x position
         float newX = Mathf.Lerp(transform.position.x, targetX, xOffsetChangeSpeed * Time.deltaTime);
         transform.position = new Vector3(newX, transform.position.y, transform.position.z);
 
-        // Change the target x position when the enemy reaches the left or right limit
         if (Mathf.Abs(transform.position.x - rightLimit) < 0.1f)
         {
             targetX = leftLimit;
@@ -46,29 +64,54 @@ public class EnemyController : MonoBehaviour
             targetX = rightLimit;
         }
     }
+
     void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.CompareTag("Foods"))
+        {
+            ScoreManager.IncreaseScore(100); // Increase score by 1 when your prefab hits an enemy
+        }
         FoodType foodType = collision.gameObject.GetComponent<FoodType>();
         if (foodType != null)
         {
+            Vector3 scaleChange;
             switch (foodType.type)
             {
                 case FoodType.Type.FastFood:
-                    transform.localScale += new Vector3(2f, 2f, 2f); // Increase scale 2x
+                    scaleChange = new Vector3(2f, 2f, 2f);
                     break;
                 case FoodType.Type.Salad:
-                    transform.localScale -= new Vector3(1f, 1f, 1f); // Maintain the scale
+                    scaleChange = new Vector3(-1f, -1f, -1f);
                     break;
                 case FoodType.Type.Coke:
-                    transform.localScale += new Vector3(1.5f, 1.5f, 1.5f); // Increase scale 1.5x
+                    scaleChange = new Vector3(1.5f, 1.5f, 1.5f);
                     break;
                 case FoodType.Type.Junk:
-                    transform.localScale -= new Vector3(0.5f, 0.5f, 0.5f); // Decrease scale .5x
+                    scaleChange = new Vector3(-0.5f, -0.5f, -0.5f);
                     break;
                 case FoodType.Type.Meat:
-                    transform.localScale -= new Vector3(3f, 3f, 3f); // Increase scale 3x
+                    scaleChange = new Vector3(-3f, -3f, -3f);
+                    break;
+                default:
+                    scaleChange = Vector3.zero;
                     break;
             }
+
+            // Check if the new scale is within the limits
+            Vector3 newScale = transform.localScale + scaleChange;
+            if (newScale.x >= 0.5f && newScale.y >= 0.5f && newScale.z >= 0.5f &&
+                newScale.x <= 3f && newScale.y <= 3f && newScale.z <= 3f)
+            {
+                // Apply the scale change
+                transform.localScale = newScale;
+            }
+        }
+    }
+    void OnDestroy()
+    {
+        if (!hitEnemy) // If the prefab is destroyed without hitting an enemy
+        {
+            ScoreManager.DecreaseScore(100); // Decrease score by 1
         }
     }
 }

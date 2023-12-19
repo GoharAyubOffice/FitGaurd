@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class FoodThrower : MonoBehaviour
 {
-    private int currentPoolIndex = 0; // Add this line at the top of your class
     public List<GameObject> foodPrefabs;
-    public float throwForce = 1000f;
-    public float delay = 1f;
     public Transform shootPosition;
-    public int poolSize = 20; // Size of the object pool
-    public float destroyTime = 5f; // Time after which the objects will be destroyed
+    public float throwForce = 700f;
+    public float destroyTime = 5f;
+    public float tapDelay = 1f; // Delay between taps
+    public int poolSize = 10;
 
-    private List<GameObject> objectPool; // The object pool
+    private List<GameObject> objectPool;
+    private int currentPoolIndex = 0;
+    private float lastTapTime; // Time of the last tap
 
     void Start()
     {
@@ -23,27 +24,34 @@ public class FoodThrower : MonoBehaviour
             int index = i % foodPrefabs.Count; // Cycle through the foodPrefabs list
             GameObject food = Instantiate(foodPrefabs[index], shootPosition.position, Quaternion.identity);
             food.SetActive(false);
+            food.AddComponent<Food>(); // Add the Food component to each food prefab
             objectPool.Add(food);
         }
+    }
 
-        StartCoroutine(StartThrowing());
-    }
-    IEnumerator StartThrowing()
+    void Update()
     {
-        yield return new WaitForSeconds(1f); // Wait for 1 second
-        StartCoroutine(ThrowFood());
+        // Check for a screen tap
+        if (Input.GetMouseButtonDown(0) && Time.time - lastTapTime >= tapDelay)
+        {
+            ThrowFoodOnce();
+            lastTapTime = Time.time; // Update the time of the last tap
+        }
     }
-    IEnumerator ThrowFood()
-{
-    while (true)
+
+    public string GetUpcomingPrefabName()
+    {
+        // Get the name of the upcoming prefab
+        return objectPool[currentPoolIndex].name;
+    }
+
+    void ThrowFoodOnce()
     {
         GameObject food = GetPooledObject();
         if (food != null)
         {
             food.transform.position = shootPosition.position;
-            food.transform.SetParent(shootPosition); // Set the parent to the weapon
             food.SetActive(true);
-            food.transform.parent = null; // Remove the parent
             Debug.Log("Instantiated prefab: " + food.name); // Log the name of the instantiated prefab
             Rigidbody rb = food.GetComponent<Rigidbody>();
             if (rb != null)
@@ -52,13 +60,13 @@ public class FoodThrower : MonoBehaviour
                 rb.AddForce(shootPosition.up * throwForce);
             }
             StartCoroutine(DestroyAfterTime(food, destroyTime));
-        }
-        yield return new WaitForSeconds(delay);
+            StartCoroutine(CheckCollision(food, destroyTime)); // Start the CheckCollision coroutine
 
-        // Cycle through the object pool
-        currentPoolIndex = (currentPoolIndex + 1) % objectPool.Count;
+            // Cycle through the object pool
+            currentPoolIndex = (currentPoolIndex + 1) % objectPool.Count;
+        }
     }
-}
+
     GameObject GetPooledObject()
     {
         // Start searching from the current pool index
@@ -74,9 +82,36 @@ public class FoodThrower : MonoBehaviour
         return null;
     }
 
-    IEnumerator DestroyAfterTime(GameObject obj, float time)
+    IEnumerator DestroyAfterTime(GameObject food, float delay)
     {
-        yield return new WaitForSeconds(time);
-        obj.SetActive(false);
+        yield return new WaitForSeconds(delay);
+        food.SetActive(false);
+    }
+
+    IEnumerator CheckCollision(GameObject food, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        // If the food hasn't hit an enemy within the time limit
+        if (!food.GetComponent<Food>().hitEnemy)
+        {
+            ScoreManager.DecreaseScore(1); // Decrease score by 1
+        }
+
+        // Reset the hitEnemy flag
+        food.GetComponent<Food>().hitEnemy = false;
+    }
+}
+
+public class Food : MonoBehaviour
+{
+    public bool hitEnemy = false;
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("enemy"))
+        {
+            hitEnemy = true; // Set hitEnemy to true when the food hits an enemy
+        }
     }
 }

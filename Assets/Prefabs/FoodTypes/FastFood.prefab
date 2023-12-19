@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 2513586869425566964}
   - component: {fileID: 5417249804068223350}
   - component: {fileID: -8853739149936304771}
+  - component: {fileID: -4737498645287945937}
   m_Layer: 0
   m_Name: FastFood
-  m_TagString: Untagged
+  m_TagString: Foods
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -144,5 +145,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c4c3a8a75452b494d942f93538770cb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+--- !u!114 &-4737498645287945937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9198024676848677266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5dba9281f75d476083296f9866b74f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
